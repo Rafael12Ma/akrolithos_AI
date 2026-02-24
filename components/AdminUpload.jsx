@@ -50,7 +50,7 @@ export default function AdminUpload() {
       />
       <input type="file" onChange={handleFileChange} />
       <button onClick={handleUpload} className="bg-black text-white p-2 w-full">
-        Upload Stone
+        Upload Stones
       </button>
       {uploadUrl && (
         <div>
