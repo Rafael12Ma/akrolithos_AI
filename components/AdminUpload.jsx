@@ -40,6 +40,24 @@ export default function AdminUpload() {
   };
 
   return (
-   <h1>test</h1>
+    <div className="space-y-4">
+      <input
+        type="text"
+        placeholder="Stone name"
+        value={stoneName}
+        onChange={(e) => setStoneName(e.target.value)}
+        className="border p-2 w-full"
+      />
+      <input type="file" onChange={handleFileChange} />
+      <button onClick={handleUpload} className="bg-black text-white p-2 w-full">
+        Upload Stones
+      </button>
+      {uploadUrl && (
+        <div>
+          <p>Uploaded Stone Preview:</p>
+          <img src={uploadUrl} alt="uploaded stone" style={{ maxWidth: 200 }} />
+        </div>
+      )}
+    </div>
   );
 }
