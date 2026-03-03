@@ -2,6 +2,7 @@
 import AdminUpload from "@/components/AdminUpload";
 import CanvasEditor from "@/components/CanvasEditor";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 const toBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -105,27 +106,28 @@ export default function Home() {
               )}
 
               {roomPreview && (
-                <div className="relative group rounded-2xl overflow-hidden border border-neutral-800 shadow-2xl shadow-black/40">
-                  <img
+                <motion.div
+                  className="relative rounded-2xl overflow-hidden border border-neutral-800 shadow-2xl shadow-black/40"
+                  initial={false}
+                  whileHover="hover"
+                >
+                  <motion.img
                     src={roomPreview}
                     alt="Room preview"
-                    className="w-full h-44 sm:h-56 object-cover transition duration-300 group-hover:brightness-75"
+                    className="w-full h-44 sm:h-56 object-cover"
+                    variants={{
+                      hover: { scale: 1.03 },
+                    }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
                   />
 
-                  {/* Change Image Overlay */}
-                  <label
-                    className="
-    absolute bottom-4 right-4
-    bg-black/70 backdrop-blur-sm
-    px-4 py-2
-    rounded-full
-    text-white text-sm font-medium
-    transition
-    cursor-pointer
-
-    opacity-100 sm:opacity-0
-    sm:group-hover:opacity-100
-  "
+                  <motion.label
+                    variants={{
+                      hover: { opacity: 1, y: 0 },
+                    }}
+                    initial={{ opacity: 0, y: 20 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="absolute bottom-6 right-6 bg-white text-black px-5 py-2 rounded-full text-sm font-medium shadow-lg cursor-pointer"
                   >
                     Change Image
                     <input
@@ -134,8 +136,8 @@ export default function Home() {
                       onChange={handleRoomUpload}
                       className="hidden"
                     />
-                  </label>
-                </div>
+                  </motion.label>
+                </motion.div>
               )}
             </div>
           </div>
