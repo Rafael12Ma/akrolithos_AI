@@ -27,6 +27,7 @@ export default function Home() {
       setProducts([]);
     }
   };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -50,68 +51,121 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-        {/* HEADER */}
-        <div className="space-y-3">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
-            Akrolithos AI Visualizer
+    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-black text-white">
+      <div className="max-w-6xl mx-auto px-6 py-16 space-y-16">
+        {/* HERO */}
+        <div className="text-center space-y-6 max-w-3xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight">
+            Visualize Natural Stone
+            <span className="block text-neutral-400 font-light mt-2">
+              In Your Own Space
+            </span>
           </h1>
-          <p className="text-neutral-400 text-sm sm:text-base max-w-2xl">
-            Preview natural stone surfaces in your space instantly.
+
+          <p className="text-neutral-500 text-sm sm:text-base">
+            Upload a photo. Select a surface. Generate a realistic preview
+            instantly.
           </p>
         </div>
 
-        {/* MAIN GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {/* ROOM UPLOAD */}
-          <div className="space-y-6">
-            <h2 className="text-lg sm:text-xl font-semibold">1. Upload Room</h2>
+        {/* MAIN SECTION */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-14">
+          {/* ROOM */}
+          {/* ROOM */}
+          <div className="space-y-8">
+            <h2 className="text-lg sm:text-xl font-medium text-neutral-300">
+              1. Upload Room
+            </h2>
 
-            <label className="flex items-center justify-center h-40 sm:h-48 border border-neutral-700 rounded-xl cursor-pointer hover:border-white transition text-center px-4">
-              <span className="text-neutral-400 text-sm sm:text-base">
-                Tap or click to upload
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleRoomUpload}
-                className="hidden"
-              />
-            </label>
+            <div className="relative">
+              {!roomPreview && (
+                <label
+                  className="
+          flex items-center justify-center
+          h-44 sm:h-56
+          border border-dashed border-neutral-700
+          rounded-2xl
+          bg-neutral-900/40
+          hover:border-neutral-400
+          transition
+          cursor-pointer
+          text-center px-6
+        "
+                >
+                  <span className="text-neutral-500 text-sm sm:text-base">
+                    Click or tap to upload your room image
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleRoomUpload}
+                    className="hidden"
+                  />
+                </label>
+              )}
 
-            {roomPreview && (
-              <img
-                src={roomPreview}
-                alt="Room preview"
-                className="w-full rounded-xl border border-neutral-700"
-              />
-            )}
+              {roomPreview && (
+                <div className="relative group rounded-2xl overflow-hidden border border-neutral-800 shadow-2xl shadow-black/40">
+                  <img
+                    src={roomPreview}
+                    alt="Room preview"
+                    className="w-full h-44 sm:h-56 object-cover transition duration-300 group-hover:brightness-75"
+                  />
+
+                  {/* Change Image Overlay */}
+                  <label
+                    className="
+    absolute bottom-4 right-4
+    bg-black/70 backdrop-blur-sm
+    px-4 py-2
+    rounded-full
+    text-white text-sm font-medium
+    transition
+    cursor-pointer
+
+    opacity-100 sm:opacity-0
+    sm:group-hover:opacity-100
+  "
+                  >
+                    Change Image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleRoomUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* STONE SELECTION */}
-          <div className="space-y-6">
-            <h2 className="text-lg sm:text-xl font-semibold">
+          {/* STONES */}
+          <div className="space-y-8">
+            <h2 className="text-lg sm:text-xl font-medium text-neutral-300">
               2. Select Stone
             </h2>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
               {products.map((p) => (
                 <div
                   key={p.id}
                   onClick={() => handleSelectTexture(p.imageUrl, p.id)}
-                  className={`cursor-pointer rounded-xl overflow-hidden transition${
-                    selectedStone === p.id
-                      ? "ring-2 ring-white scale-105"
-                      : "border border-neutral-800 hover:border-white"
-                  }
+                  className={`
+                    group cursor-pointer rounded-2xl overflow-hidden
+                    transition-all duration-300
+                    ${
+                      selectedStone === p.id
+                        ? "ring-2 ring-white scale-[1.03]"
+                        : "border border-neutral-800 hover:border-neutral-500"
+                    }
                   `}
                 >
                   <img
                     src={p.imageUrl}
-                    className="w-full h-24 sm:h-28 object-cover"
+                    className="w-full h-28 object-cover transition duration-500 group-hover:scale-110"
                   />
-                  <div className="p-2 text-xs sm:text-sm text-center bg-neutral-900">
+                  <div className="p-3 text-xs sm:text-sm text-center bg-neutral-900">
                     {p.name}
                   </div>
                 </div>
@@ -125,10 +179,15 @@ export default function Home() {
           <CanvasEditor roomImage={roomBase64} stoneImage={stoneBase64} />
         )}
 
+        {/* DIVIDER */}
+        <div className="h-px bg-neutral-800" />
+
         {/* ADMIN */}
-        <div className="border-t border-neutral-800 pt-10">
-          <h2 className="text-lg sm:text-xl font-semibold mb-6">Admin Panel</h2>
-          <AdminUpload onUploadSuccess={fetchProducts} />{" "}
+        <div className="space-y-6">
+          <h2 className="text-lg sm:text-xl font-medium text-neutral-400">
+            Admin Panel
+          </h2>
+          <AdminUpload onUploadSuccess={fetchProducts} />
         </div>
       </div>
     </div>

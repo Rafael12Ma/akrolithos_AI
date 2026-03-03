@@ -28,34 +28,44 @@ export default function CanvasEditor({ roomImage, stoneImage }) {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-10">
 
-            <button
-                onClick={handleGenerate}
-                disabled={loading}
-                className="w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 rounded-xl font-semibold transition bg-white text-black hover:opacity-90"
-            >
-                {loading ? "Rendering..." : "Generate AI Preview"}
-            </button>
+            <div className="text-center">
+                <button
+                    onClick={handleGenerate}
+                    disabled={loading}
+                    className="
+            px-10 py-4
+            rounded-full
+            bg-white text-black
+            font-medium tracking-wide
+            hover:opacity-90
+            transition
+            shadow-lg shadow-black/30
+          "
+                >
+                    {loading ? "Rendering..." : "Generate AI Preview"}
+                </button>
+            </div>
 
             {loading && (
-                <div className="flex items-center gap-3">
+                <div className="flex justify-center items-center gap-3">
                     <div className="animate-spin h-6 w-6 border-t-2 border-white rounded-full" />
                     <p className="text-neutral-400 text-sm">
-                        Generating showroom preview...
+                        Generating realistic preview...
                     </p>
                 </div>
             )}
 
             {generatedImage && (
-                <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">
-                        AI Result
+                <div className="space-y-6 text-center">
+                    <h3 className="text-lg font-medium text-neutral-300">
+                        Result Preview
                     </h3>
-                    <img
-                        src={generatedImage}
-                        className="w-full rounded-xl border border-neutral-700"
-                    />
+
+                    <div className="rounded-2xl overflow-hidden border border-neutral-800 shadow-2xl shadow-black/40">
+                        <img src={generatedImage} className="w-full" />
+                    </div>
                 </div>
             )}
         </div>

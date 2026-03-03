@@ -13,7 +13,6 @@ export default function AdminUpload({ onUploadSuccess }) {
 
     setFile(selectedFile);
 
-    // 🔥 Show instant preview
     const reader = new FileReader();
     reader.readAsDataURL(selectedFile);
     reader.onload = () => {
@@ -49,7 +48,6 @@ export default function AdminUpload({ onUploadSuccess }) {
       }),
     });
 
-    // 🔥 Close preview + reset state
     setPreviewImage(null);
     setFile(null);
     setStoneName("");
@@ -62,14 +60,13 @@ export default function AdminUpload({ onUploadSuccess }) {
 
   return (
     <>
-      {/* Admin Form */}
-      <div className="bg-neutral-900 p-6 rounded-xl border border-neutral-800 space-y-4 max-w-md">
+      <div className="bg-neutral-900/70 backdrop-blur p-6 rounded-2xl border border-neutral-800 space-y-4 max-w-md">
         <input
           type="text"
           placeholder="Stone name"
           value={stoneName}
           onChange={(e) => setStoneName(e.target.value)}
-          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2"
+          className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-sm"
         />
 
         <input type="file" onChange={handleFileChange} className="text-sm" />
@@ -83,11 +80,9 @@ export default function AdminUpload({ onUploadSuccess }) {
         </button>
       </div>
 
-      {/* 🔥 Fullscreen Preview Modal */}
       {previewImage && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="relative bg-neutral-900 rounded-2xl p-6 w-full max-w-2xl max-h-[85vh] overflow-auto">
-            {/* Close Button */}
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
+          <div className="relative bg-neutral-900 rounded-2xl p-6 w-full max-w-xl max-h-[85vh] overflow-auto">
             <button
               onClick={() => setPreviewImage(null)}
               className="absolute top-4 right-4 bg-white text-black px-3 py-1 rounded"
@@ -95,13 +90,11 @@ export default function AdminUpload({ onUploadSuccess }) {
               ✕
             </button>
 
-            {/* Image */}
             <img
               src={previewImage}
               className="w-full max-h-[60vh] object-contain rounded-xl"
             />
 
-            {/* Confirm Button */}
             <div className="mt-6 text-center">
               <button
                 onClick={handleUpload}
