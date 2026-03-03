@@ -38,14 +38,25 @@ export async function GET(req) {
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "24");
 
+  const collection = searchParams.get("collection");
+  const color = searchParams.get("color");
+  const finish = searchParams.get("finish");
+  const indoor = searchParams.get("indoor");
+
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  const query = supabase
+  let query = supabase
     .from("products")
     .select("*", { count: "exact" })
-    .in("surface_type", [surface, "both"])
-    .range(from, to);
+    .in("surface_type", [surface, "both"]);
+
+  if (collection) query = query.eq("collection", collection);
+  if (color) query = query.eq("color", color);
+  if (finish) query = query.eq("finish", finish);
+  if (indoor) query = query.eq("indoor_outdoor", indoor);
+
+  query = query.range(from, to);
 
   const { data, error, count } = await query;
 
@@ -55,11 +66,7 @@ export async function GET(req) {
     });
   }
 
-  return new Response(
-    JSON.stringify({
-      data,
-      total: count,
-    }),
-    { status: 200 }
-  );
-}
+  return new Response(JSON.stringify({ data, total: count }), {
+    status: 200,
+  });
+} 
