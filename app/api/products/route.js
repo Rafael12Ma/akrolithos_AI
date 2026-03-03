@@ -31,15 +31,35 @@ export async function POST(req) {
   }
 }
 
-export async function GET() {
-  const { data, error } = await supabase.from("products").select("*")
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+
+  const surface = searchParams.get("surface");
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "24");
+
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const query = supabase
+    .from("products")
+    .select("*", { count: "exact" })
+    .in("surface_type", [surface, "both"])
+    .range(from, to);
+
+  const { data, error, count } = await query;
 
   if (error) {
-    console.error("Fetch error:", error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-    })
+    });
   }
 
-  return new Response(JSON.stringify(data), { status: 200 })
+  return new Response(
+    JSON.stringify({
+      data,
+      total: count,
+    }),
+    { status: 200 }
+  );
 }
