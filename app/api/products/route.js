@@ -46,19 +46,29 @@ export async function GET(req) {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  let query = supabase
+  // ------------------------
+  // BASE FILTERED QUERY (no pagination yet)
+  // ------------------------
+
+  let baseQuery = supabase
     .from("products")
-    .select("*", { count: "exact" })
-    .in("surface_type", [surface, "both"]);
+    .select("*", { count: "exact" });
 
-  if (collection) query = query.eq("collection", collection);
-  if (color) query = query.eq("color", color);
-  if (finish) query = query.eq("finish", finish);
-  if (indoor) query = query.eq("indoor_outdoor", indoor);
+  if (surface) {
+    baseQuery = baseQuery.in("surface_type", [surface, "both"]);
+  }
 
-  query = query.range(from, to);
+  if (collection) baseQuery = baseQuery.eq("collection", collection);
+  if (color) baseQuery = baseQuery.eq("color", color);
+  if (finish) baseQuery = baseQuery.eq("finish", finish);
+  if (indoor) baseQuery = baseQuery.eq("indoor_outdoor", indoor);
 
-  const { data, error, count } = await query;
+  // Clone for products
+  let productQuery = baseQuery
+    .order("createdat", { ascending: false })
+    .range(from, to);
+
+  const { data, error, count } = await productQuery;
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {
@@ -66,7 +76,30 @@ export async function GET(req) {
     });
   }
 
-  return new Response(JSON.stringify({ data, total: count }), {
-    status: 200,
-  });
-} 
+  // ------------------------
+  // FACETS (distinct values based on filtered result)
+  // ------------------------
+
+  const { data: facetData } = await baseQuery;
+
+  const distinct = (key) =>
+    [...new Set(facetData.map((p) => p[key]).filter(Boolean))];
+
+  const facets = {
+    collections: distinct("collection"),
+    colors: distinct("color"),
+    finishes: distinct("finish"),
+    indoor: distinct("indoor_outdoor"),
+  };
+
+  return new Response(
+    JSON.stringify({
+      data,
+      total: count,
+      page,
+      totalPages: Math.ceil(count / limit),
+      facets,
+    }),
+    { status: 200 }
+  );
+}
