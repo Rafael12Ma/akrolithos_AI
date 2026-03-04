@@ -52,16 +52,7 @@ export default function Home() {
           {!roomImage ? (
             <div
               onClick={() => fileInputRef.current.click()}
-              className="
-      flex items-center justify-center
-      h-44 sm:h-56 md:h-72
-      border border-neutral-700
-      rounded-2xl
-      hover:border-white
-      transition
-      text-neutral-400
-      cursor-pointer
-      "
+              className=" flex items-center justify-center h-44 sm:h-56 md:h-72 border border-neutral-700 rounded-2xl hover:border-white transition text-neutral-400 cursor-pointer"
             >
               Click to upload room image
             </div>
@@ -91,19 +82,7 @@ export default function Home() {
 
               <button
                 onClick={() => fileInputRef.current.click()}
-                className="
-    absolute
-    top-3 right-3
-    sm:top-4 sm:right-4
-    bg-black/70
-    backdrop-blur
-    px-3 py-1.5
-    sm:px-4 sm:py-2
-    text-xs sm:text-sm
-    rounded-lg
-    hover:bg-black
-    transition
-    "
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/70 backdrop-blur px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-lg hover:bg-black transition"
               >
                 Change Image
               </button>

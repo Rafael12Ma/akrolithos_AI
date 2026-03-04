@@ -144,7 +144,8 @@ export default function ProductSelectorModal({ surface, onClose, onSelect }) {
         </div>
 
         {/* MAIN CONTENT */}
-        <div className="flex flex-1 min-h-0 flex-col md:flex-row">
+        <div className="flex flex-1 flex-col md:flex-row overflow-hidden">
+          {" "}
           {/* FILTERS */}
           <div
             className={`
@@ -196,9 +197,8 @@ export default function ProductSelectorModal({ surface, onClose, onSelect }) {
               )}
             </div>
           </div>
-
           {/* PRODUCT GRID */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 pb-24 md:pb-10">
             {loading ? (
               <p className="text-neutral-400">Loading products...</p>
             ) : displayedProducts.length === 0 ? (
@@ -243,7 +243,8 @@ export default function ProductSelectorModal({ surface, onClose, onSelect }) {
         </div>
 
         {/* PAGINATION */}
-        <div className="px-4 sm:px-6 md:px-10 py-4 md:py-6 border-t border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="px-4 sm:px-6 md:px-10 py-4 md:py-6 border-t border-neutral-800 bg-neutral-950 flex items-center justify-between gap-3 sticky bottom-0">
+          {" "}
           <button
             disabled={page === 1}
             onClick={() => setPage((prev) => prev - 1)}
@@ -251,12 +252,10 @@ export default function ProductSelectorModal({ surface, onClose, onSelect }) {
           >
             Previous
           </button>
-
           <div className="text-sm text-neutral-400">
             Page <span className="text-white font-medium">{page}</span> of{" "}
             <span className="text-white font-medium">{totalPages}</span>
           </div>
-
           <button
             disabled={page === totalPages}
             onClick={() => setPage((prev) => prev + 1)}
