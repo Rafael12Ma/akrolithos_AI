@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import ProductSelectorModal from "@/components/ProductSelectorModal";
 import CanvasEditor from "@/components/CanvasEditor";
+import { useState, useRef } from "react";
 
 const toBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -14,12 +14,11 @@ const toBase64 = (file) =>
 
 export default function Home() {
   const [roomImage, setRoomImage] = useState(null);
-
+  const fileInputRef = useRef(null);
   const [wallProduct, setWallProduct] = useState(null);
   const [floorProduct, setFloorProduct] = useState(null);
 
   const [openSelector, setOpenSelector] = useState(null);
-  // "wall" | "floor" | null
 
   const handleRoomUpload = async (e) => {
     const file = e.target.files[0];
@@ -27,6 +26,8 @@ export default function Home() {
 
     const base64 = await toBase64(file);
     setRoomImage(base64);
+
+    e.target.value = "";
   };
 
   return (
@@ -44,30 +45,78 @@ export default function Home() {
         </div>
 
         {/* ROOM UPLOAD */}
+        {/* ROOM UPLOAD */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">1. Upload Room</h2>
 
-          <label className="flex items-center justify-center h-56 border border-neutral-700 rounded-2xl cursor-pointer hover:border-white transition relative overflow-hidden">
-            {!roomImage && (
-              <span className="text-neutral-400">
-                Click to upload room image
-              </span>
-            )}
-
-            {roomImage && (
+          {!roomImage ? (
+            <div
+              onClick={() => fileInputRef.current.click()}
+              className="
+      flex items-center justify-center
+      h-44 sm:h-56 md:h-72
+      border border-neutral-700
+      rounded-2xl
+      hover:border-white
+      transition
+      text-neutral-400
+      cursor-pointer
+      "
+            >
+              Click to upload room image
+            </div>
+          ) : (
+            <div
+              className="
+  relative
+  w-full
+  rounded-2xl
+  overflow-hidden
+  border border-neutral-800
+  flex
+  items-center
+  justify-center
+  bg-neutral-950
+  h-56
+  sm:h-72
+  md:h-[420px]
+  lg:h-[520px]
+  "
+            >
               <img
                 src={roomImage}
-                className="absolute inset-0 w-full h-full object-cover"
+                alt="Room preview"
+                className="max-h-full max-w-full object-contain"
               />
-            )}
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleRoomUpload}
-              className="hidden"
-            />
-          </label>
+              <button
+                onClick={() => fileInputRef.current.click()}
+                className="
+    absolute
+    top-3 right-3
+    sm:top-4 sm:right-4
+    bg-black/70
+    backdrop-blur
+    px-3 py-1.5
+    sm:px-4 sm:py-2
+    text-xs sm:text-sm
+    rounded-lg
+    hover:bg-black
+    transition
+    "
+              >
+                Change Image
+              </button>
+            </div>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleRoomUpload}
+            className="hidden"
+          />
         </div>
 
         {/* SURFACE SELECTION */}
@@ -133,7 +182,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* GENERATOR */}
+        {/* CANVAS EDITOR */}
         {roomImage && (
           <CanvasEditor
             roomImage={roomImage}
