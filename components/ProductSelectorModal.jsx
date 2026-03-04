@@ -10,7 +10,7 @@ export default function ProductSelectorModal({ surface, onClose, onSelect }) {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-
+  const [showFilters, setShowFilters] = useState(true);
   const [search, setSearch] = useState("");
 
   const [collection, setCollection] = useState("");
@@ -81,128 +81,76 @@ export default function ProductSelectorModal({ surface, onClose, onSelect }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
-        <div className="px-10 pt-8 pb-6 border-b border-neutral-800">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight">
-                Select {surface} surface
-              </h2>
-              <p className="text-neutral-400 text-sm mt-1">{total} results</p>
-            </div>
+        {/* MAIN CONTENT */}
+        <div className="flex flex-1 min-h-0">
+          {/* SIDEBAR FILTERS */}
+          <div className="w-[300px] border-r border-neutral-800 p-6 overflow-y-auto shrink-0">
+            <div className="space-y-8">
+              <FilterGroup
+                title="Collection"
+                options={facets.collections}
+                active={collection}
+                onSelect={setCollection}
+              />
 
-            <button
-              onClick={onClose}
-              className="text-neutral-500 hover:text-white text-xl transition"
-            >
-              ✕
-            </button>
+              <FilterGroup
+                title="Color"
+                options={facets.colors}
+                active={color}
+                onSelect={setColor}
+              />
+
+              <FilterGroup
+                title="Finish"
+                options={facets.finishes}
+                active={finish}
+                onSelect={setFinish}
+              />
+
+              <FilterGroup
+                title="Indoor / Outdoor"
+                options={facets.indoor}
+                active={indoor}
+                onSelect={setIndoor}
+              />
+            </div>
           </div>
 
-          {/* SEARCH */}
-          <div className="mt-6">
-            <input
-              type="text"
-              placeholder="Search product name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl px-5 py-4 focus:outline-none focus:border-neutral-600 transition text-sm"
-            />
-          </div>
-
-          {/* ACTIVE FILTERS */}
-          {(collection || color || finish || indoor) && (
-            <div className="flex flex-wrap gap-3 mt-6">
-              <span className="text-neutral-400 text-sm">Active filters:</span>
-
-              {collection && (
-                <FilterTag
-                  label={collection}
-                  onClick={() => setCollection("")}
-                />
-              )}
-              {color && (
-                <FilterTag label={color} onClick={() => setColor("")} />
-              )}
-              {finish && (
-                <FilterTag label={finish} onClick={() => setFinish("")} />
-              )}
-              {indoor && (
-                <FilterTag label={indoor} onClick={() => setIndoor("")} />
-              )}
-
-              <button
-                onClick={resetFilters}
-                className="text-xs text-neutral-400 underline ml-3"
-              >
-                Reset all
-              </button>
-            </div>
-          )}
-
-          {/* FILTER CHIPS */}
-          <div className="mt-4 max-h-[100px] overflow-y-auto pr-2 space-y-3">
-            {" "}
-            <FilterGroup
-              title="Collection"
-              options={facets.collections}
-              active={collection}
-              onSelect={setCollection}
-            />
-            <FilterGroup
-              title="Color"
-              options={facets.colors}
-              active={color}
-              onSelect={setColor}
-            />
-            <FilterGroup
-              title="Finish"
-              options={facets.finishes}
-              active={finish}
-              onSelect={setFinish}
-            />
-            <FilterGroup
-              title="Indoor / Outdoor"
-              options={facets.indoor}
-              active={indoor}
-              onSelect={setIndoor}
-            />
-          </div>
-        </div>
-        {/* PRODUCT GRID */}
-        <div className="flex-1 overflow-y-auto px-10 py-8 min-h-0">
-          {loading ? (
-            <p className="text-neutral-400">Loading products...</p>
-          ) : displayedProducts.length === 0 ? (
-            <div className="text-center text-neutral-400 mt-16">
-              No products match your filters.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-              {displayedProducts.map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => onSelect(p)}
-                  className="group cursor-pointer"
-                >
-                  <div className="rounded-2xl overflow-hidden bg-neutral-900 transition duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-black/40">
-                    <div className="w-full aspect-[4/3] overflow-hidden">
-                      <img
-                        src={p.imageUrl}
-                        alt={p.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                      />
+          {/* PRODUCT GRID */}
+          <div className="flex-1 overflow-y-auto p-10">
+            {loading ? (
+              <p className="text-neutral-400">Loading products...</p>
+            ) : displayedProducts.length === 0 ? (
+              <div className="text-center text-neutral-400 mt-16">
+                No products match your filters.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 xl:grid-cols-3 gap-8">
+                {displayedProducts.map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => onSelect(p)}
+                    className="group cursor-pointer"
+                  >
+                    <div className="rounded-2xl overflow-hidden bg-neutral-900 transition duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl group-hover:shadow-black/40">
+                      <div className="w-full aspect-[4/3] overflow-hidden">
+                        <img
+                          src={p.imageUrl}
+                          alt={p.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        />
+                      </div>
                     </div>
+
+                    <p className="mt-4 text-center text-base font-medium text-neutral-200 group-hover:text-white transition">
+                      {p.name}
+                    </p>
                   </div>
-
-                  <p className="mt-4 text-center text-base font-medium text-neutral-200 group-hover:text-white transition">
-                    {p.name}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-
         {/* PAGINATION */}
         <div className="px-10 py-6 border-t border-neutral-800 flex items-center justify-between">
           <button
