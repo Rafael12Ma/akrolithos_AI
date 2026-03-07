@@ -1,37 +1,19 @@
 import OpenAI from "openai";
-import sharp from "sharp";
+import { supabaseAdmin } from "@/lib/SupabaseAdmin";
 
 export const runtime = "nodejs";
 
-function base64ToFile(base64, filename) {
-    const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
-    const buffer = Buffer.from(base64Data, "base64");
-
-    return new File([buffer], filename, { type: "image/jpeg" });
-}
-
-async function cropStoneTexture(url) {
-    const res = await fetch(url);
-    const buffer = Buffer.from(await res.arrayBuffer());
-
-    return new File([buffer], "stone.jpg", { type: "image/jpeg" });
-}
-
 export async function POST(req) {
     try {
+
         const body = await req.json();
+        const { previewImage } = body;
 
-        const { roomImage, wallImage, floorImage } = body;
+        console.log("previewImage exists:", !!previewImage);
 
-        console.log("roomImage exists:", !!roomImage);
-        console.log("wallImage exists:", !!wallImage);
-        console.log("floorImage exists:", !!floorImage);
-
-        const stoneImage = wallImage || floorImage;
-
-        if (!roomImage || !stoneImage) {
+        if (!previewImage) {
             return Response.json(
-                { error: "Missing roomImage or stoneImage" },
+                { error: "Missing preview image" },
                 { status: 400 }
             );
         }
@@ -40,61 +22,88 @@ export async function POST(req) {
             apiKey: process.env.OPENAI_API_KEY,
         });
 
-        const roomBuffer = Buffer.from(
-            roomImage.replace(/^data:image\/\w+;base64,/, ""),
-            "base64"
+        // Convert preview base64 → file
+        const base64Data = previewImage.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, "base64");
+
+        const previewFile = new File(
+            [buffer],
+            "preview.jpg",
+            { type: "image/jpeg" }
         );
-
-        const resized = await sharp(roomBuffer)
-            .resize(1024)
-            .jpeg({ quality: 85 })
-            .toBuffer();
-
-        const roomFile = new File([resized], "room.jpg", {
-            type: "image/jpeg",
-        });
-        const stoneFile = await cropStoneTexture(stoneImage);
 
         const prompt = `
 You are a professional architectural renderer.
 
-The first image is a room interior.
-The second image is a stone wall material.
+The image is a preview of a room where stone textures have already been applied.
 
-Apply the stone material naturally to the vertical walls of the room.
+Improve the realism of the render.
 
-1. detect wall
-2. tile stone texture
-3. perspective warp
-4. AI adjusts lighting and shadows to match the original room photo
+Enhance:
+- natural lighting
+- material realism
+- shadows
+- depth
+- reflections
 
 Rules:
-- Only modify wall surfaces
-- Keep floor, windows, furniture and ceiling unchanged
-- Preserve original lighting and shadows
-- Maintain perspective and geometry of the room
-- Use realistic masonry scale
-- Do not stretch the material
-- Result must look like a real photograph of a stone wall installation
+- Do not change the stone texture
+- Do not change geometry
+- Do not change objects or layout
+- Only improve realism and lighting
+
+The result must look like a professional architectural photograph.
 `;
 
         const result = await client.images.edit({
             model: "gpt-image-1",
             prompt,
-            image: [roomFile, stoneFile],
+            image: previewFile,
             size: "1024x1024",
         });
 
+        const base64Image = result.data[0].b64_json;
+
+        // Convert AI result → buffer
+        const imageBuffer = Buffer.from(base64Image, "base64");
+
+        const fileName = `render-${Date.now()}.png`;
+
+        // Upload render to Supabase Storage
+        const { error: uploadError } = await supabaseAdmin.storage
+            .from("renders")
+            .upload(fileName, imageBuffer, {
+                contentType: "image/png",
+            });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data } = supabaseAdmin.storage
+            .from("renders")
+            .getPublicUrl(fileName);
+
+        const imageUrl = data.publicUrl;
+
+        // Save render in database
+        await supabaseAdmin
+            .from("generated_renders")
+            .insert({
+                image_url: imageUrl
+            });
+
         return Response.json({
-            image: result.data[0].b64_json,
+            image: imageUrl,
         });
 
     } catch (error) {
+
         console.error("AI EDIT ERROR:", error);
 
         return Response.json(
             { error: error.message },
             { status: 500 }
         );
+
     }
 }
