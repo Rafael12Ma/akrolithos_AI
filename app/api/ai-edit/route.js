@@ -1,17 +1,20 @@
 import OpenAI from "openai";
 import { supabaseAdmin } from "@/lib/SupabaseAdmin";
+import { randomUUID } from "crypto";
 
 export const runtime = "nodejs";
+
 function slugify(str) {
     return str
         ?.toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 }
+
 export async function POST(req) {
     try {
-
         const body = await req.json();
+
         const {
             previewImage,
             wallProduct,
@@ -31,7 +34,7 @@ export async function POST(req) {
             apiKey: process.env.OPENAI_API_KEY,
         });
 
-        // Convert preview base64 → file
+        // Convert preview base64 → buffer
         const base64Data = previewImage.replace(/^data:image\/\w+;base64,/, "");
         const buffer = Buffer.from(base64Data, "base64");
 
@@ -62,16 +65,11 @@ You must preserve the exact stone pattern, shape, and arrangement.
 
 Do not redesign or reinterpret the stone.
 
-Only enhance lighting, shadows, and photographic realism.- Do not change geometry
-- Do not change objects or layout
-- Only improve realism and lighting
--The stone material visible in the image is final.
+Only enhance lighting, shadows, and photographic realism.
 
-Do NOT replace or redesign the stone.
+Do not change geometry.
+Do not change objects or layout.
 
-Preserve the exact texture pattern.
-
-Only improve lighting, shadows, and realism.
 The stone material visible in the image is final.
 
 Do NOT replace or redesign the stone.
@@ -79,6 +77,7 @@ Do NOT replace or redesign the stone.
 Preserve the exact texture pattern.
 
 Only improve lighting, shadows, and realism.
+
 The result must look like a professional architectural photograph.
 `;
 
@@ -91,7 +90,7 @@ The result must look like a professional architectural photograph.
 
         const base64Image = result.data[0].b64_json;
 
-        // Convert AI result → buffer
+        // Convert AI image → buffer
         const imageBuffer = Buffer.from(base64Image, "base64");
 
         const date = new Date().toISOString().split("T")[0];
@@ -99,9 +98,12 @@ The result must look like a professional architectural photograph.
         const wall = slugify(wallProduct || "wall");
         const floor = slugify(floorProduct || "floor");
 
-        const fileName = `${wall}-${floor}-${date}.png`;
+        // UNIQUE FILE NAME
+        const uniqueId = randomUUID();
 
-        // Upload render to Supabase Storage
+        const fileName = `${wall}-${floor}-${date}-${uniqueId}.png`;
+
+        // Upload to Supabase Storage
         const { error: uploadError } = await supabaseAdmin.storage
             .from("renders")
             .upload(fileName, imageBuffer, {
@@ -117,7 +119,7 @@ The result must look like a professional architectural photograph.
 
         const imageUrl = data.publicUrl;
 
-        // Save render in database
+        // Save in database
         await supabaseAdmin
             .from("generated_renders")
             .insert({
@@ -137,6 +139,5 @@ The result must look like a professional architectural photograph.
             { error: error.message },
             { status: 500 }
         );
-
     }
 }

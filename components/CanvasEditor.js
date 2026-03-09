@@ -5,6 +5,8 @@ import { useRef, useState } from "react";
 import CanvasStage from "./visualizer/CanvasStage";
 import GenerateButton from "./visualizer/GenerateButton";
 import RenderCompare from "./visualizer/RenderCompare";
+import RenderStatus from "./visualizer/RenderStatus";
+import RenderTransition from "./visualizer/RenderTransition";
 
 export default function CanvasEditor({
     roomImage,
@@ -62,10 +64,12 @@ export default function CanvasEditor({
                 onClick={generateRender}
             />
 
+            <RenderStatus generating={generating} />
+
             {previewImage && aiImage && (
-                <RenderCompare
-                    preview={previewImage}
-                    ai={aiImage}
+                <RenderTransition
+                    previewImage={previewImage}
+                    aiImage={aiImage}
                 />
             )}
 

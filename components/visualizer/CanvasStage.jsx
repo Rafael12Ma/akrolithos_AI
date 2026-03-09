@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createWallMask } from "@/lib/wallmask";
+import { useEffect } from "react";
 import { detectWalls } from "@/lib/detectWalls";
+import { projectTexture } from "@/lib/canvas/projectTexture";
 
 export default function CanvasStage({
   canvasRef,
@@ -11,8 +11,6 @@ export default function CanvasStage({
   floorProduct,
   setPreviewImage,
 }) {
-  const [wallMask, setWallMask] = useState(null);
-
   function loadImage(src) {
     return new Promise((resolve) => {
       const img = new Image();
@@ -20,18 +18,6 @@ export default function CanvasStage({
       img.src = src;
       img.onload = () => resolve(img);
     });
-  }
-
-  function handleCanvasClick(e) {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-
-    const x = Math.floor(e.clientX - rect.left);
-    const y = Math.floor(e.clientY - rect.top);
-
-    const mask = createWallMask(canvas, x, y);
-
-    setWallMask(mask);
   }
 
   function drawPolygon(ctx, points) {
@@ -82,34 +68,6 @@ export default function CanvasStage({
     }
   }
 
-  function applyMask(ctx, mask, canvas) {
-    if (!mask) return;
-
-    const maskCanvas = document.createElement("canvas");
-
-    maskCanvas.width = canvas.width;
-    maskCanvas.height = canvas.height;
-
-    const maskCtx = maskCanvas.getContext("2d");
-
-    const imgData = maskCtx.createImageData(canvas.width, canvas.height);
-
-    for (let i = 0; i < mask.data.length; i++) {
-      const val = mask.data[i] ? 255 : 0;
-
-      imgData.data[i * 4] = val;
-      imgData.data[i * 4 + 1] = val;
-      imgData.data[i * 4 + 2] = val;
-      imgData.data[i * 4 + 3] = val;
-    }
-
-    maskCtx.putImageData(imgData, 0, 0);
-
-    ctx.globalCompositeOperation = "destination-in";
-    ctx.drawImage(maskCanvas, 0, 0);
-    ctx.globalCompositeOperation = "source-over";
-  }
-
   async function renderScene() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -124,18 +82,14 @@ export default function CanvasStage({
     ctx.drawImage(room, 0, 0);
 
     const planes = detectWalls(room);
-
-    if (wallProduct && wallMask) {
+    if (!wallProduct) return;
+    if (wallProduct) {
       const texture = await loadImage(wallProduct.imageUrl);
 
       ctx.save();
 
-      drawPerspectiveTexture(ctx, texture, planes.backWall);
-
+      projectTexture(ctx, texture, planes.backWall);
       drawPerspectiveTexture(ctx, texture, planes.leftWall);
-
-      applyMask(ctx, wallMask, canvas);
-
       ctx.restore();
     }
 
@@ -156,13 +110,11 @@ export default function CanvasStage({
     if (!roomImage) return;
 
     renderScene();
-  }, [roomImage, wallProduct, floorProduct, wallMask]);
-
+  }, [roomImage, wallProduct, floorProduct]);
   return (
     <canvas
       ref={canvasRef}
-      onClick={handleCanvasClick}
-      className="max-w-full rounded-xl border border-neutral-800 cursor-crosshair"
+      className="max-w-full rounded-xl border border-neutral-800"
     />
   );
 }
