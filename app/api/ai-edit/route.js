@@ -2,12 +2,21 @@ import OpenAI from "openai";
 import { supabaseAdmin } from "@/lib/SupabaseAdmin";
 
 export const runtime = "nodejs";
-
+function slugify(str) {
+    return str
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+}
 export async function POST(req) {
     try {
 
         const body = await req.json();
-        const { previewImage } = body;
+        const {
+            previewImage,
+            wallProduct,
+            floorProduct
+        } = body;
 
         console.log("previewImage exists:", !!previewImage);
 
@@ -47,11 +56,29 @@ Enhance:
 - reflections
 
 Rules:
-- Do not change the stone texture
-- Do not change geometry
+The stone material already applied in the image is the exact product texture.
+
+You must preserve the exact stone pattern, shape, and arrangement.
+
+Do not redesign or reinterpret the stone.
+
+Only enhance lighting, shadows, and photographic realism.- Do not change geometry
 - Do not change objects or layout
 - Only improve realism and lighting
+-The stone material visible in the image is final.
 
+Do NOT replace or redesign the stone.
+
+Preserve the exact texture pattern.
+
+Only improve lighting, shadows, and realism.
+The stone material visible in the image is final.
+
+Do NOT replace or redesign the stone.
+
+Preserve the exact texture pattern.
+
+Only improve lighting, shadows, and realism.
 The result must look like a professional architectural photograph.
 `;
 
@@ -67,7 +94,12 @@ The result must look like a professional architectural photograph.
         // Convert AI result → buffer
         const imageBuffer = Buffer.from(base64Image, "base64");
 
-        const fileName = `render-${Date.now()}.png`;
+        const date = new Date().toISOString().split("T")[0];
+
+        const wall = slugify(wallProduct || "wall");
+        const floor = slugify(floorProduct || "floor");
+
+        const fileName = `${wall}-${floor}-${date}.png`;
 
         // Upload render to Supabase Storage
         const { error: uploadError } = await supabaseAdmin.storage
@@ -93,7 +125,8 @@ The result must look like a professional architectural photograph.
             });
 
         return Response.json({
-            image: imageUrl,
+            aiImage: imageUrl,
+            previewImage
         });
 
     } catch (error) {
