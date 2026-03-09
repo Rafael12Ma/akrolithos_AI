@@ -48,8 +48,10 @@ export default function CanvasStage({
 
       const scale = 1 - t0 * 0.6;
 
-      const tileWidth = texture.width * scale;
+      const baseTile = Math.min(texture.width, texture.height);
+      let tileWidth = baseTile * 0.5 * scale;
 
+      tileWidth = Math.max(80 * scale, Math.min(tileWidth, 320 * scale));
       ctx.save();
 
       ctx.beginPath();

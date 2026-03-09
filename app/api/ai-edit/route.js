@@ -47,38 +47,28 @@ export async function POST(req) {
         const prompt = `
 You are a professional architectural renderer.
 
-The image is a preview of a room where stone textures have already been applied.
+The stone material already visible in the image is the final product.
 
-Improve the realism of the render.
+CRITICAL RULE:
+You must preserve the exact stone pattern, shapes, grout lines, and arrangement.
 
-Enhance:
-- natural lighting
-- material realism
-- shadows
-- depth
-- reflections
+Do NOT:
+- redesign the stone
+- invent new stones
+- change stone shapes
+- change grout patterns
+- change the texture pattern
 
-Rules:
-The stone material already applied in the image is the exact product texture.
+The stone surface must remain pixel-identical.
 
-You must preserve the exact stone pattern, shape, and arrangement.
+Only improve:
+• lighting
+• shadows
+• reflections
+• global realism
+• camera quality
 
-Do not redesign or reinterpret the stone.
-
-Only enhance lighting, shadows, and photographic realism.
-
-Do not change geometry.
-Do not change objects or layout.
-
-The stone material visible in the image is final.
-
-Do NOT replace or redesign the stone.
-
-Preserve the exact texture pattern.
-
-Only improve lighting, shadows, and realism.
-
-The result must look like a professional architectural photograph.
+Treat the stone material as a locked texture layer.
 `;
 
         const result = await client.images.edit({
