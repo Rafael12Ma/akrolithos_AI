@@ -5,6 +5,12 @@ import { useEffect, useState } from "react";
 export default function RenderDetailsModal({ render, onClose }) {
   const [visible, setVisible] = useState(false);
 
+  function formatName(name) {
+    if (!name) return "";
+
+    return name.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
   useEffect(() => {
     setVisible(true);
   }, []);
@@ -15,7 +21,7 @@ export default function RenderDetailsModal({ render, onClose }) {
     setVisible(false);
     setTimeout(onClose, 200); // match animation duration
   }
-
+  console.log(render);
   return (
     <div
       onClick={handleClose}
@@ -56,14 +62,22 @@ export default function RenderDetailsModal({ render, onClose }) {
             <strong>Date:</strong>{" "}
             {new Date(render.created_at).toLocaleString()}
           </p>
+
           {render.wall_product && (
             <p>
-              <strong>Wall:</strong> {render.wall_product}
+              <strong>Wall Stone:</strong>{" "}
+              <span className="text-white">
+                {formatName(render.wall_product)}
+              </span>
             </p>
           )}
+
           {render.floor_product && (
             <p>
-              <strong>Floor:</strong> {render.floor_product}
+              <strong>Floor Material:</strong>{" "}
+              <span className="text-white">
+                {formatName(render.wall_product)}
+              </span>
             </p>
           )}
         </div>

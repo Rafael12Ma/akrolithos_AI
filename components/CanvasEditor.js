@@ -6,7 +6,6 @@ import CanvasStage from "./visualizer/CanvasStage";
 import GenerateButton from "./visualizer/GenerateButton";
 import RenderStatus from "./visualizer/RenderStatus";
 import RenderTransition from "./visualizer/RenderTransition";
-import RecentRenders from "./Recent Renders/RecentRenders";
 
 
 export default function CanvasEditor({
@@ -52,7 +51,9 @@ export default function CanvasEditor({
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    previewImage: preview
+                    previewImage: preview,
+                    wallProduct: wallProduct?.name || null,
+                    floorProduct: floorProduct?.name || null
                 })
             });
 
