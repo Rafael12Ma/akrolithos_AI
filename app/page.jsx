@@ -3,6 +3,8 @@
 import ProductSelectorModal from "@/components/ProductSelectorModal";
 import CanvasEditor from "@/components/CanvasEditor";
 import { useState, useRef } from "react";
+import RecentRenders from "@/components/Recent Renders/RecentRenders";
+import RenderDetails from "@/components/Recent Renders/RenderDetails";
 
 const toBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -13,6 +15,7 @@ const toBase64 = (file) =>
   });
 
 export default function Home() {
+  const [selectedRender, setSelectedRender] = useState(null);
   const [roomImage, setRoomImage] = useState(null);
   const fileInputRef = useRef(null);
   const [wallProduct, setWallProduct] = useState(null);
@@ -43,7 +46,14 @@ export default function Home() {
             realistic showroom preview.
           </p>
         </div>
-
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Recent Renders</h2>
+          <RecentRenders
+            onSelect={(render) => {
+              setSelectedRender(render);
+            }}
+          />
+        </div>
         {/* ROOM UPLOAD */}
         {/* ROOM UPLOAD */}
         <div className="space-y-4">
@@ -181,6 +191,12 @@ export default function Home() {
             if (openSelector === "floor") setFloorProduct(product);
             setOpenSelector(null);
           }}
+        />
+      )}
+      {selectedRender && (
+        <RenderDetails
+          render={selectedRender}
+          onClose={() => setSelectedRender(null)}
         />
       )}
     </div>

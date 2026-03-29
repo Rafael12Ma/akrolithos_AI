@@ -4,9 +4,10 @@ import { useRef, useState } from "react";
 
 import CanvasStage from "./visualizer/CanvasStage";
 import GenerateButton from "./visualizer/GenerateButton";
-import RenderCompare from "./visualizer/RenderCompare";
 import RenderStatus from "./visualizer/RenderStatus";
 import RenderTransition from "./visualizer/RenderTransition";
+import RecentRenders from "./Recent Renders/RecentRenders";
+
 
 export default function CanvasEditor({
     roomImage,
@@ -20,37 +21,62 @@ export default function CanvasEditor({
     const [aiImage, setAiImage] = useState(null);
     const [generating, setGenerating] = useState(false);
 
+    // ✅ Select past render
+    function handleSelectRender(render) {
+        if (!render) return;
+
+        setPreviewImage(render.preview_url);
+        setAiImage(render.ai_render_url);
+    }
+
+    // ✅ Generate AI render
     async function generateRender() {
 
         const canvas = canvasRef.current;
 
-        const preview = canvas.toDataURL("image/jpeg", 0.92);
+        if (!canvas) {
+            console.error("Canvas not ready");
+            return;
+        }
 
-        setPreviewImage(preview);
+        try {
+            const preview = canvas.toDataURL("image/jpeg", 0.9);
 
-        setGenerating(true);
+            setPreviewImage(preview);
+            setAiImage(null); // ✅ reset old AI result
+            setGenerating(true);
 
-        const res = await fetch("/api/ai-edit", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                previewImage: preview
-            })
-        });
+            const res = await fetch("/api/ai-edit", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    previewImage: preview
+                })
+            });
 
-        const data = await res.json();
+            if (!res.ok) {
+                throw new Error("Failed to generate render");
+            }
 
-        setAiImage(data.aiImage);
+            const data = await res.json();
 
-        setGenerating(false);
+            setAiImage(data.aiImage);
+
+        } catch (err) {
+            console.error("Render error:", err);
+        } finally {
+            setGenerating(false);
+        }
     }
 
     return (
-
         <div className="w-full flex flex-col items-center gap-6 mt-10">
 
+            {/* ✅ Recent renders FIRST */}
+
+            {/* ✅ Canvas */}
             <CanvasStage
                 canvasRef={canvasRef}
                 roomImage={roomImage}
@@ -59,13 +85,16 @@ export default function CanvasEditor({
                 setPreviewImage={setPreviewImage}
             />
 
+            {/* ✅ Generate button */}
             <GenerateButton
                 generating={generating}
                 onClick={generateRender}
             />
 
+            {/* ✅ Progress UI */}
             <RenderStatus generating={generating} />
 
+            {/* ✅ Result */}
             {previewImage && aiImage && (
                 <RenderTransition
                     previewImage={previewImage}

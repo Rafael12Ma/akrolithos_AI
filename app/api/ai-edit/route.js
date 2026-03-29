@@ -21,8 +21,6 @@ export async function POST(req) {
             floorProduct
         } = body;
 
-        console.log("previewImage exists:", !!previewImage);
-
         if (!previewImage) {
             return Response.json(
                 { error: "Missing preview image" },
@@ -79,21 +77,16 @@ Treat the stone material as a locked texture layer.
         });
 
         const base64Image = result.data[0].b64_json;
-
-        // Convert AI image → buffer
         const imageBuffer = Buffer.from(base64Image, "base64");
 
         const date = new Date().toISOString().split("T")[0];
-
         const wall = slugify(wallProduct || "wall");
         const floor = slugify(floorProduct || "floor");
 
-        // UNIQUE FILE NAME
         const uniqueId = randomUUID();
-
         const fileName = `${wall}-${floor}-${date}-${uniqueId}.png`;
 
-        // Upload to Supabase Storage
+        // ✅ Upload AI image
         const { error: uploadError } = await supabaseAdmin.storage
             .from("renders")
             .upload(fileName, imageBuffer, {
@@ -102,19 +95,24 @@ Treat the stone material as a locked texture layer.
 
         if (uploadError) throw uploadError;
 
-        // Get public URL
         const { data } = supabaseAdmin.storage
             .from("renders")
             .getPublicUrl(fileName);
 
         const imageUrl = data.publicUrl;
 
-        // Save in database
-        await supabaseAdmin
+        // ✅ FIX: Save BOTH preview + AI render
+        const { error: dbError } = await supabaseAdmin
             .from("generated_renders")
             .insert({
-                image_url: imageUrl
+                preview_url: previewImage,     // ✅ REQUIRED
+                ai_render_url: imageUrl,       // ✅ REQUIRED
+                wall_product: wallProduct || null,
+                floor_product: floorProduct || null,
+                created_at: new Date().toISOString()
             });
+
+        if (dbError) throw dbError;
 
         return Response.json({
             aiImage: imageUrl,
